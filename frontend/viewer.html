@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
+      rel="stylesheet"
+    />
+    <title>Camara</title>
+  </head>
+  <style>
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  </style>
+  <body>
+    <button
+      data-drawer-target="default-sidebar"
+      data-drawer-toggle="default-sidebar"
+      aria-controls="default-sidebar"
+      type="button"
+      class="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+    >
+      <span class="sr-only">Open sidebar</span>
+      <svg
+        class="w-6 h-6"
+        aria-hidden="true"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          clip-rule="evenodd"
+          fill-rule="evenodd"
+          d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+        ></path>
+      </svg>
+    </button>
+
+    <aside
+      id="default-sidebar"
+      class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+      aria-label="Sidebar"
+    >
+      <div class="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
+        <ul class="space-y-2 font-medium">
+          <li>
+            <a
+              href="#"
+              class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+            >
+              <svg
+                class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 22 21"
+              >
+                <path
+                  d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z"
+                />
+                <path
+                  d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"
+                />
+              </svg>
+              <span class="ms-3">Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <div class="max-w-sm mx-auto">
+              <label
+                for="video-input"
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >Selecciona una camara</label
+              >
+              <select
+                id="video-input"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              ></select>
+              <button
+                type="button"
+                id="start-button"
+                class="my-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+              >
+                Conectar
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <div class="p-4 sm:ml-64">
+      <div
+        class="p-4 rounded-lg grid grid-cols-4 gap-4 max-w-screen-lg"
+        id="container"
+      ></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+    <script>
+      // Listar camaras
+      // Listar camaras
+
+      let select = document.getElementById("video-input");
+      let startButton = document.getElementById("start-button");
+      let container = document.getElementById("container");
+      let devicesFiltered = [];
+      let devicesConected = [];
+      const totalGrids = 4;
+
+      function enumerateInputDevices() {
+        navigator.mediaDevices
+          .enumerateDevices()
+          .then((devices) => {
+            devicesFiltered = devices.filter(
+              (device) => device.kind == "videoinput"
+            );
+            let counter = 1;
+            devicesFiltered.forEach((device) => {
+              console.log(device);
+              const option = document.createElement("option");
+              option.value = device.deviceId;
+              option.text = device.label || "Camara #" + counter;
+              select.appendChild(option);
+              counter++;
+            });
+          })
+          .catch((e) => {
+            alert(e);
+          });
+      }
+
+      enumerateInputDevices();
+
+      function startCamera() {
+        let videoInput = select.value;
+        let label = select.options[select.selectedIndex].text;
+        if (devicesConected.find((device) => device.deviceId == videoInput)) {
+          alert("Esta cámara ya está conectada");
+          return;
+        }
+
+        devicesConected.push({
+          deviceId: videoInput,
+          label: label,
+        });
+
+        /* let constraints = {
+    video: {
+      deviceId: videoInput,
+    },
+    audio: false,
+  }; */
+
+        startConection(videoInput, label);
+
+        /*   navigator.mediaDevices
+    .getUserMedia(constraints)
+    .then((stream) => {
+  
+    })
+    .catch((e) => {
+      alert(e);
+    }); */
+      }
+
+      startButton.addEventListener("click", () => {
+        // startCamera();
+        startConnection();
+      });
+
+      // Crear un objeto para almacenar las conexiones
+      let connections = [];
+      let streams = [];
+      const API_TOKEN = "98943522-64fd-449b-80ff-87bcf18a157f";
+      let config = {
+        sdpSemantics: "unified-plan",
+        iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
+      };
+      // Función para crear una nueva conexión
+
+      function createConnection(idCamera, nameCamera) {
+        let peerConnection = new RTCPeerConnection(config);
+        let dataConnection = {
+          id: idCamera,
+          peerConnection: peerConnection,
+          label: nameCamera,
+        };
+
+        peerConnection.onconnectionstatechange = () => {
+          console.log(
+            "Connection State Change: " + nameCamera,
+            peerConnection.connectionState
+          );
+          if (peerConnection.connectionState === "failed") {
+            /* TODO poner en ui que se perdio la conexion con el servidor */
+            showOverlay(idCamera, true);
+            let actualStream = streams.find((stream) => stream.id === idCamera);
+            actualStream.stream.getTracks().forEach((track) => {
+              track.stop();
+            });
+          }
+        };
+
+        connections.push(dataConnection);
+        return dataConnection;
+      }
+
+      function negotiate(pc, idCamera, nameCamera) {
+        return pc
+          .createOffer()
+          .then((offer) => {
+            console.log("offer.sdp", offer.sdp);
+            return pc.setLocalDescription(offer);
+          })
+          .then(() => {
+            // wait for ICE gathering to complete
+
+            return new Promise((resolve) => {
+              if (pc.iceGatheringState === "complete") {
+                resolve();
+              } else {
+                function checkState() {
+                  if (pc.iceGatheringState === "complete") {
+                    pc.removeEventListener(
+                      "icegatheringstatechange",
+                      checkState
+                    );
+                    resolve();
+                  }
+                }
+                pc.addEventListener("icegatheringstatechange", checkState);
+                console.log("resolve", pc.iceGatheringState);
+              }
+            });
+          })
+          .then(() => {
+            let offer = pc.localDescription;
+            let codec = "H264/90000";
+
+            offer.sdp = sdpFilterCodec("video", codec, offer.sdp);
+
+            return fetch("/offer", {
+              body: JSON.stringify({
+                sdp: offer.sdp,
+                type: offer.type,
+                type_conection: "camera",
+                token: API_TOKEN,
+                idCamera: idCamera,
+                nameCamera: nameCamera,
+              }),
+              headers: {
+                "Content-Type": "application/json",
+              },
+              method: "POST",
+            });
+          })
+          .then((response) => {
+            return response.json();
+          })
+          .then((answer) => {
+            console.log("answer.sdp", answer.sdp);
+            return pc.setRemoteDescription(answer);
+          })
+          .catch((e) => {
+            alert(e);
+          });
+      }
+
+      function startConection(idCamera, nameCamera) {
+        let dataConnection = createConnection(idCamera, nameCamera);
+        let pc = dataConnection.peerConnection;
+        // let parameters = { ordered: true };
+
+        const constraints = {
+          video: false,
+        };
+
+        const videoConstraints = {};
+
+        videoConstraints.deviceId = { exact: idCamera };
+
+        /* const resolution = document.getElementById("video-resolution").value;
+  if (resolution) {
+    const dimensions = resolution.split("x");
+    videoConstraints.width = parseInt(dimensions[0], 0);
+    videoConstraints.height = parseInt(dimensions[1], 0);
+    console.log('dimensions');
+    console.log(dimensions);
+    console.log('dimensions');
+
+  } */
+
+        constraints.video = videoConstraints;
+
+        navigator.mediaDevices.getUserMedia(constraints).then(
+          (stream) => {
+            streams.push({ id: idCamera, stream: stream });
+            let containerVideo = document.createElement("div");
+            containerVideo.id = "container-video-" + idCamera;
+            containerVideo.classList.add(
+              "col-span-" + totalGrids / devicesConected.length,
+              "relative"
+            );
+            let overlayVideo = document.createElement("div");
+            overlayVideo.id = "overlay-video-" + idCamera;
+            overlayVideo.classList.add(
+              "absolute",
+              "inset-0",
+              "bg-black",
+              "bg-opacity-50",
+              "flex",
+              "justify-center",
+              "items-center",
+              "text-white",
+              "text-lg",
+              "w-full",
+              "h-full",
+              "hidden"
+            );
+            overlayVideo.innerHTML = "Error en la conexión";
+            let video = document.createElement("video");
+            video.id = "video-" + idCamera;
+            video.classList.add("w-full", "h-full", "object-cover");
+            video.autoplay = true;
+            containerVideo.appendChild(video);
+            containerVideo.appendChild(overlayVideo);
+            container.appendChild(containerVideo);
+            video.srcObject = stream;
+            // video.play();
+
+            console.log("Media acquired. con el track");
+            /* stream.getTracks().forEach((track) => {
+              pc.addTrack(track, stream);
+            }); */
+            const dataChannel = pc.createDataChannel("myDataChannel");
+            dataChannel.onopen = () => {
+              console.log("dataChannel open");
+              dataChannel.send("Hello World!");
+            };
+            return negotiate(pc, idCamera, nameCamera);
+          },
+          (err) => {
+            alert("Could not acquire media: " + err);
+          }
+        );
+      }
+
+      function showOverlay(idCamera, active) {
+        let overlay = document.getElementById("overlay-video-" + idCamera);
+        if (active) {
+          overlay.classList.remove("hidden");
+        } else {
+          overlay.classList.add("hidden");
+        }
+      }
+
+      function sdpFilterCodec(kind, codec, realSdp) {
+        var allowed = [];
+        var rtxRegex = new RegExp("a=fmtp:(\\d+) apt=(\\d+)\r$");
+        var codecRegex = new RegExp("a=rtpmap:([0-9]+) " + escapeRegExp(codec));
+        var videoRegex = new RegExp("(m=" + kind + " .*?)( ([0-9]+))*\\s*$");
+
+        var lines = realSdp.split("\n");
+
+        var isKind = false;
+        for (var i = 0; i < lines.length; i++) {
+          if (lines[i].startsWith("m=" + kind + " ")) {
+            isKind = true;
+          } else if (lines[i].startsWith("m=")) {
+            isKind = false;
+          }
+
+          if (isKind) {
+            var match = lines[i].match(codecRegex);
+            if (match) {
+              allowed.push(parseInt(match[1]));
+            }
+
+            match = lines[i].match(rtxRegex);
+            if (match && allowed.includes(parseInt(match[2]))) {
+              allowed.push(parseInt(match[1]));
+            }
+          }
+        }
+
+        var skipRegex = "a=(fmtp|rtcp-fb|rtpmap):([0-9]+)";
+        var sdp = "";
+
+        isKind = false;
+        for (var i = 0; i < lines.length; i++) {
+          if (lines[i].startsWith("m=" + kind + " ")) {
+            isKind = true;
+          } else if (lines[i].startsWith("m=")) {
+            isKind = false;
+          }
+
+          if (isKind) {
+            var skipMatch = lines[i].match(skipRegex);
+            if (skipMatch && !allowed.includes(parseInt(skipMatch[2]))) {
+              continue;
+            } else if (lines[i].match(videoRegex)) {
+              sdp +=
+                lines[i].replace(videoRegex, "$1 " + allowed.join(" ")) + "\n";
+            } else {
+              sdp += lines[i] + "\n";
+            }
+          } else {
+            sdp += lines[i] + "\n";
+          }
+        }
+
+        return sdp;
+      }
+
+      function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+      }
+
+      const peerConnection = new RTCPeerConnection();
+
+      // Añadir un transceptor para recibir video
+      peerConnection.addTransceiver("video", { direction: "recvonly" });
+
+      peerConnection.ontrack = (event) => {
+        console.log("Track de video recibido:", event.track);
+        // Aquí puedes, por ejemplo, asignar el track a un elemento HTML <video> para mostrarlo
+        const videoElement = document.createElement("video");
+        videoElement.autoplay = true;
+        videoElement.playsInline = true;
+        videoElement.srcObject = new MediaStream([event.track]);
+        document.body.appendChild(videoElement);
+      };
+
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate === null) {
+          console.log('peerConnection.iceGatheringState status: ',peerConnection.iceGatheringState)
+          console.log(
+            "Gathering completo. SDP para enviar:",
+            peerConnection.localDescription
+          );
+        }
+      };
+
+      async function startConnection() {
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        console.log("SDP de la oferta:", offer.sdp);
+        // Enviar la oferta al servidor
+        const response = await fetch("/offer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sdp: offer.sdp,
+            type: offer.type,
+            token: API_TOKEN,
+            type_conection: "viewer",
+          }),
+        });
+        const answer = await response.json();
+        console.log("SDP de la respuesta:", answer.sdp);
+        await peerConnection.setRemoteDescription(answer);
+      }
+
+    </script>
+  </body>
+</html>
