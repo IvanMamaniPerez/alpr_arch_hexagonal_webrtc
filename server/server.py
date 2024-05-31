@@ -219,6 +219,9 @@ if __name__ == "__main__":
     for route in list(app.router.routes()):
         cors.add(route)
 
+    #web.run_app(
+    #    app, access_log=None, host=args.host, port=args.port, ssl_context=ssl_context
+    #)
     web.run_app(
-        app, access_log=None, host=args.host, port=args.port, ssl_context=ssl_context
+        app, access_log=None, host=args.host, port=args.port
     )
