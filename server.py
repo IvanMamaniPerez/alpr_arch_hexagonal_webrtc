@@ -12,6 +12,11 @@ import aiohttp_cors
 from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
 from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder, MediaRelay
 from av import VideoFrame
+# import sys
+# sys.path.append("src/PeerConnection")
+from src.PeerConnection.PeerConnectionCameraManager import PeerConnectionCameraManager
+
+peer_connection_camera_manager = PeerConnectionCameraManager()
 
 ROOT = os.path.dirname(__file__)
 
@@ -23,9 +28,6 @@ camera_pcs = {}
 viewer_pcs = {}
 active_tracks = []
 class VideoTransformTrack(MediaStreamTrack):
-    """
-    A video stream track that transforms frames from an another track.
-    """
 
     kind = "video"
 
@@ -34,12 +36,8 @@ class VideoTransformTrack(MediaStreamTrack):
         self.track = track
         self.token = token
 
-        
-
     async def recv(self):
         frame = await self.track.recv()
-
-        
         return frame
 
 def get_viewer_pcs():
@@ -49,23 +47,13 @@ def handle_new_track(track):
     relayed_track = relay.subscribe(track)
     active_tracks.append(relayed_track)
 
-
 async def index(request):
-    content = open(os.path.join(ROOT, "./../frontend/index.html"), "r").read()
-    return web.Response(content_type="text/html", text=content)
+    content = json.dumps(
+            peer_connection_camera_manager.to_json()
+        )
+    
+    return web.Response(content_type="application/json", text=content)
 
-async def viewer(request):
-    content = open(os.path.join(ROOT, "./../frontend/viewer.html"), "r").read()
-    return web.Response(content_type="text/html", text=content)
-
-
-async def javascriptCamara(request):
-    content = open(os.path.join(ROOT, "./../frontend/camara.js"), "r").read()
-    return web.Response(content_type="application/javascript", text=content)
-
-async def javascriptConnectionRTC(request):
-    content = open(os.path.join(ROOT, "./../frontend/connectionRTC.js"), "r").read()
-    return web.Response(content_type="application/javascript", text=content)
 
 async def offer(request):
     params = await request.json()
@@ -77,7 +65,9 @@ async def offer(request):
     pc = RTCPeerConnection()
     pc_id = "PeerConnection(%s)" % uuid.uuid4()
     pcs.add(pc)
-
+    if connection_type == 'camera': 
+        peer_connection_camera_manager.add_peer_connection(pc, 'camera', 'camarilla', 'dispositivo','puerta 1');
+    
     if connection_type == "viewer":
         viewer_pcs[pc_id] = pc  # Almacenar la conexión del viewer
         # Subscribir este viewer a todos los streams de cámara disponibles
@@ -162,12 +152,12 @@ async def on_shutdown(app):
     pcs.clear()
 
 
-if __name__ == "__main__":
+if  __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="WebRTC audio / video / data-channels demo"
     )
-    parser.add_argument("--cert-file", default='./server/cert.pem', help="SSL certificate file (for HTTPS)")
-    parser.add_argument("--key-file", default='./server/key.pem', help="SSL key file (for HTTPS)")
+    parser.add_argument("--cert-file", default='./cert.pem', help="SSL certificate file (for HTTPS)")
+    parser.add_argument("--key-file", default='./key.pem', help="SSL key file (for HTTPS)")
     parser.add_argument(
         "--host", default="0.0.0.0", help="Host for HTTP server (default: 0.0.0.0)"
     )
@@ -193,13 +183,6 @@ if __name__ == "__main__":
     app = web.Application()
     app.on_shutdown.append(on_shutdown)
     app.router.add_get("/", index)
-    app.router.add_get("/viewer", viewer)
-    app.router.add_get("/camara.js", javascriptCamara)
-    app.router.add_get("/connectionRTC.js", javascriptConnectionRTC)
-    # app.router.add_get("/validation", validation)
-    # app.router.add_get("/script.js", javascriptScript)
-
-
     app.router.add_post("/offer", offer)
     """ web.run_app(
         app, access_log=None, host=args.host, port=args.port, ssl_context=ssl_context
