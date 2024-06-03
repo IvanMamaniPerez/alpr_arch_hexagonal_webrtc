@@ -1,6 +1,6 @@
 from typing import Set
 from aiortc import RTCPeerConnection
-from PeerConnectionManager import PeerConnectionManager
+from src.PeerConnection.PeerConnectionManager import PeerConnectionManager
 
 class PeerConnectionViewerManager(PeerConnectionManager):
 

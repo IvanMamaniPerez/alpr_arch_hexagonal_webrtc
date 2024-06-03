@@ -1,5 +1,5 @@
-from typing import Any
-from aiortc import RTCPeerConnection
+from typing import Any, List
+from aiortc import RTCPeerConnection, MediaStreamTrack
 
 class PeerConnectionData:
     def __init__(self, peer_connection: RTCPeerConnection, type:str, camera: str, name_device: str, access_point: str):
@@ -8,6 +8,7 @@ class PeerConnectionData:
         self.camera          = camera
         self.access_point    = access_point
         self.name_device     = name_device
+        self.active_tracks: List[MediaStreamTrack] = [] 
 
     def __eq__(self, other):
         if isinstance(other, PeerConnectionData):

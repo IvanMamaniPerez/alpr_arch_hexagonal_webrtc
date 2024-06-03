@@ -5,28 +5,22 @@ import logging
 import os
 import ssl
 import uuid
-
 import cv2
 from aiohttp import web
 import aiohttp_cors
 from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
 from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder, MediaRelay
 from av import VideoFrame
-# import sys
-# sys.path.append("src/PeerConnection")
 from src.PeerConnection.PeerConnectionCameraManager import PeerConnectionCameraManager
+from src.PeerConnection.PeerConnectionViewerManager import PeerConnectionViewerManager
 
 peer_connection_camera_manager = PeerConnectionCameraManager()
+peer_connection_viewer_manager = PeerConnectionViewerManager()
 
 ROOT = os.path.dirname(__file__)
 
 logger = logging.getLogger("pc")
-pcs = set()
-relay = MediaRelay()
 
-camera_pcs = {}
-viewer_pcs = {}
-active_tracks = []
 class VideoTransformTrack(MediaStreamTrack):
 
     kind = "video"
@@ -39,13 +33,6 @@ class VideoTransformTrack(MediaStreamTrack):
     async def recv(self):
         frame = await self.track.recv()
         return frame
-
-def get_viewer_pcs():
-    return viewer_pcs.values()
-
-def handle_new_track(track):
-    relayed_track = relay.subscribe(track)
-    active_tracks.append(relayed_track)
 
 async def index(request):
     content = json.dumps(
@@ -61,27 +48,29 @@ async def offer(request):
     connection_type = params["type_conection"]
 
     offer = RTCSessionDescription(sdp=params["sdp"], type=params["type"])
+    print(f"Received offer SDP:\n{offer.sdp}")  
 
     pc = RTCPeerConnection()
     pc_id = "PeerConnection(%s)" % uuid.uuid4()
-    pcs.add(pc)
+
     if connection_type == 'camera': 
         peer_connection_camera_manager.add_peer_connection(pc, 'camera', 'camarilla', 'dispositivo','puerta 1');
     
     if connection_type == "viewer":
-        viewer_pcs[pc_id] = pc  # Almacenar la conexión del viewer
-        # Subscribir este viewer a todos los streams de cámara disponibles
-        if len(active_tracks) > 0:
-            for track in active_tracks:
+        peer_connection_viewer_manager.add_peer_connection(pc, 'viewer', 'camarilla', 'dispositivo','puerta 1');
+
+        camera_active_tracks = peer_connection_camera_manager.get_active_tracks();
+        print('Active tracks DEBUG: ', camera_active_tracks)
+        if len(camera_active_tracks) > 0:
+            for track in camera_active_tracks:
                 pc.addTrack(track)
+                print(f"Added track {track} to viewer connection {pc_id}")
 
     def log_info(msg, *args):
         logger.info(pc_id + " " + msg, *args)
 
     log_info("Created for %s", request.remote)
 
-    # prepare local media
-    
     if args.record_to:
         recorder = MediaRecorder(args.record_to)
     else:
@@ -99,30 +88,22 @@ async def offer(request):
         log_info("Connection state is %s", pc.connectionState)
         if pc.connectionState == "failed":
             await pc.close()
-            pcs.discard(pc)
+            peer_connection_camera_manager.remove_peer_connection(pc)
+            peer_connection_viewer_manager.remove_peer_connection(pc)
 
     @pc.on("track")
     def on_track(track):
         log_info("Track %s received", track.kind)
 
-        relayed_track = relay.subscribe(track)
-
-        pc.addTrack(
-            VideoTransformTrack(
-                relayed_track, token=params["token"]
-            )
-        )
-        active_tracks.append(relayed_track)
+        relayed_track = peer_connection_camera_manager.add_active_track(pc, track)
+        pc_info = peer_connection_camera_manager.get_peer_connection_info(pc)
         
-        for viewer_pc in viewer_pcs.values():
-            if isinstance(viewer_pc, RTCPeerConnection):
-                viewer_pc.addTrack(VideoTransformTrack(relayed_track, token=params["token"]))
-            else:
-                print(f"Error: Objeto inesperado en viewer_pcs: {type(viewer_pc)}")
-
-
-        if args.record_to:
-            recorder.addTrack(relay.subscribe(track))
+        if pc_info:
+            for viewer_pc in peer_connection_viewer_manager.peer_connections:
+                if isinstance(viewer_pc.peer_connection, RTCPeerConnection):
+                    viewer_pc.peer_connection.addTrack(relayed_track)
+                else:
+                    print(f"Error: Objeto inesperado en viewer_pcs: {type(viewer_pc)}")
 
         @track.on("ended")
         async def on_ended():
@@ -133,8 +114,11 @@ async def offer(request):
     await pc.setRemoteDescription(offer)
     await recorder.start()
 
+    # await asyncio.sleep(3)
+
     # send answer
     answer = await pc.createAnswer()
+    print(f"-----------Created answer SDP DEBUG {connection_type} -----------\n{answer.sdp}\n-----------Created answer SDP DEBUG {connection_type} -----------")
     await pc.setLocalDescription(answer)
 
     return web.Response(
@@ -147,9 +131,10 @@ async def offer(request):
 
 async def on_shutdown(app):
     # close peer connections
-    coros = [pc.close() for pc in pcs]
-    await asyncio.gather(*coros)
-    pcs.clear()
+    print("Shutting down...")
+    await peer_connection_camera_manager.close_all()
+    await peer_connection_viewer_manager.close_all()
+    print("Shutdown complete.")
 
 
 if  __name__ == "__main__":
