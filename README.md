@@ -6,3 +6,4 @@
 
 - GIT_SSH_COMMAND='ssh -i ~/.ssh/id_python -o IdentitiesOnly=yes' git pull origin main
 
+    
