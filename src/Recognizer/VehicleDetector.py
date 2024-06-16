@@ -45,7 +45,12 @@ class VehicleDetector:
                     result = {
                         'class_name': class_name,
                         'class_confidence': confidence,
-                        'box_coordinates': (x1, y1, x2, y2)
+                        'box_coordinates': {
+                            'x1' : x1,
+                            'y1' : y1,
+                            'x2' : x2,
+                            'y2' : y2
+                        }
                     }
         return result
 

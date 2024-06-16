@@ -1,9 +1,9 @@
 import numpy as np
 import cv2
-from src.Recognizer.LicensePlateAnalyzer import LicensePlateAnalyzer
+from Recognizer.LicensePlateDetector import LicensePlateDetector
 from ultralytics import YOLO
 
-analyzer = LicensePlateAnalyzer()
+analyzer = LicensePlateDetector()
 path_image = 'auto_photo.png'
 
 
