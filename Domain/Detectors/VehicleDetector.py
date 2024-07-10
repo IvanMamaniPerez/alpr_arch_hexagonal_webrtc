@@ -1,5 +1,8 @@
-from src.Detector.Detector import Detector
-class VehicleDetector(Detector): 
+from Application.Adapters.YOLODetectorAdapter import YOLODetectorAdapter
+
+
+
+class VehicleDetector(YOLODetectorAdapter): 
 
     def __init__(
             self, 
@@ -18,4 +21,7 @@ class VehicleDetector(Detector):
         if not detections:
             raise ValueError("No detections found")
         
+        return sorted(detections, key=lambda x: (x[0][2] - x[0][0]) * (x[0][3] - x[0][1]), reverse=True)
+
+    def sort_by_area(self, detections : list) -> list:
         return sorted(detections, key=lambda x: (x[0][2] - x[0][0]) * (x[0][3] - x[0][1]), reverse=True)

@@ -9,10 +9,11 @@ class Box:
     @classmethod
     def from_dict(cls, dict : dict) -> 'Box':
         return cls(
-            x1 = dict['x1'], 
-            y1 = dict['y1'], 
-            x2 = dict['x2'], 
-            y2 = dict['y2']) 
+                x1 = dict['x1'], 
+                y1 = dict['y1'], 
+                x2 = dict['x2'], 
+                y2 = dict['y2']
+            ) 
     
     def to_dict(self) -> dict:
         return {
@@ -21,4 +22,3 @@ class Box:
             'x2' : self.x2,
             'y2' : self.y2
         }
-    

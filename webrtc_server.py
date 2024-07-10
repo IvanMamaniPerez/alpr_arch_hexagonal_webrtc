@@ -17,8 +17,6 @@ import numpy as np
 from datetime import datetime
 import base64
 
-
-
 peer_connection_camera_manager = PeerConnectionCameraManager()
 peer_connection_viewer_manager = PeerConnectionViewerManager()
 

@@ -1,9 +1,11 @@
 from ultralytics import YOLO
 from Domain.Models.Result import Result
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import numpy as np
 from Domain.Models.Box import Box
-class Detector(ABC):
+from Application.Ports.DetectorPort import DetectorPort
+
+class YOLODetectorAdapter(DetectorPort):
     def __init__(
             self, 
             model_path : str, 

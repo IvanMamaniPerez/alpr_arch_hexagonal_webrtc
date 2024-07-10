@@ -1,4 +1,4 @@
-from src.Detector.Models.Box import Box
+from Domain.Models.Box import Box
 
 class Result:
     def __init__(self, class_name: str, confidence: float, box_coordinates: dict) -> None:
@@ -21,3 +21,4 @@ class Result:
             confidence      = data["confidence"],
             box_coordinates = data["box_coordinates"]
         )
+        

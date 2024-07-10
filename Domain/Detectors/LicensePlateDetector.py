@@ -1,6 +1,7 @@
-from src.Detector.Detector import Detector
 
-class LicensePlateDetector(Detector):
+from Application.Adapters.YOLODetectorAdapter import YOLODetectorAdapter
+
+class LicensePlateDetector(YOLODetectorAdapter):
     
     def __init__(
             self, 
@@ -11,8 +12,7 @@ class LicensePlateDetector(Detector):
                 model_path = model_path, 
                 confidence = confidence
             )
-        
-        
+
     def get_detections(self, pred) -> list:
         detections = [(box, pred.boxes.conf[i].item(), int(pred.boxes.cls[i].item()))
                             for i, box in enumerate(pred.boxes.xyxy.tolist())]

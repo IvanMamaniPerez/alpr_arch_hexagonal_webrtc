@@ -24,9 +24,15 @@ class LicensePlateOCR:
     def predict(self, image) -> list:
         list_pred = self.model.predict(image)
         results = []
+        print('List Pred:', list_pred)
+        print('List pred length:', len(list_pred))
+        
         for pred in list_pred:
             detections = [(box, pred.boxes.conf[i].item(), int(pred.boxes.cls[i].item()))
                             for i, box in enumerate(pred.boxes.xyxy.tolist())]
+            
+            print('Detections length:', len(detections))
+            
             detections.sort(key=lambda x: x[0][0])
             detections = self.filter_by_highest_confidence(detections)
             for box, confidence, class_id in detections:

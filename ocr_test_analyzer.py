@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from Recognizer.LicensePlateDetector import LicensePlateDetector
+from src.Detector.LicensePlateDetector import LicensePlateDetector
 from ultralytics import YOLO
 
 analyzer = LicensePlateDetector()
@@ -17,18 +17,14 @@ def filter_by_highest_confidence(detections):
             filtered_detections[box_tuple] = (box, confidence, class_id)
     return list(filtered_detections.values())
 
-
 modelOCR = YOLO("models/ocr_license_plate.pt")
 modelOCR.fuse()
-# name_image = "crop_cvtcolor_2024-06-07_16:40:40.jpg"
-# name_image = "crop_2024-06-07_16:39:38.jpg"
 name_image = "auto_rojo.png"
 path_image = 'storage/'+ name_image
 nparr = np.fromfile(path_image, np.uint8)
 img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
 list_pred = modelOCR.predict(img)
-
 contador = 0
 
 for pred in list_pred:
