@@ -1,14 +1,16 @@
 from Domain.Models.Box import Box
 
 class Detection:
-    def __init__(self, id_class : int, confidence : float, box : Box) -> None:
-        self.id_class   = id_class
-        self.confidence = confidence
-        self.box        = box
-        
+    def __init__(self, class_id : int, class_name: str, confidence : float, box : Box) -> None:
+        self.class_id   : int   = class_id
+        self.class_name : str   = class_name
+        self.confidence : float = confidence
+        self.box        : Box   = box
+
     def to_dict(self) -> dict:
         return {
-            "id_class"  : self.id_class,
+            "class_id"  : self.class_id,
+            "class_name": self.class_name,
             "confidence": self.confidence,
             "box"       : self.box.to_dict()
         }
@@ -16,7 +18,8 @@ class Detection:
     @classmethod
     def from_dict(cls, data: dict) -> 'Detection':
         return cls(
-            id_class   = data["id_class"],
+            class_id   = data["class_id"],
+            class_name = data["class_name"],
             confidence = data["confidence"],
             box        = Box.from_dict(data["box"])
         )

@@ -1,37 +1,42 @@
-from Application.Adapters.YOLODetectorAdapter import YOLODetectorAdapter
-class LicensePlateOCR(YOLODetectorAdapter): 
+from Domain.Detectors.Detector import Detector
+from Domain.Models.Detection import Detection
+import numpy as np
+class LicensePlateOCR(Detector): 
     def __init__(
             self, 
-            model_path : str = "models/ocr_license_plate.pt", 
-            confidence : float = .5
+            model_path : str, 
+            confidence : float
             ) -> None:
         super().__init__(
             model_path = model_path, 
             confidence = confidence
             )
 
-    def get_detections(self, pred) -> list:
-        detections = [(box, pred.boxes.conf[i].item(), int(pred.boxes.cls[i].item()))
-                            for i, box in enumerate(pred.boxes.xyxy.tolist())]
-        detections.sort(key=lambda x: x[0][0])
-        return self.filter_by_highest_confidence(detections)
-
-    def filter_by_highest_confidence(self, detections : list) -> list:
+    def filter_by_highest_confidence(self, detections : list[Detection]) -> list[Detection]:
         filtered_detections: dict = {}
-        for box, confidence, class_id in detections:
-            
-            box_tuple = tuple(map(int, box))
-            if box_tuple not in filtered_detections or filtered_detections[box_tuple][1] < confidence:
-                
-                filtered_detections[box_tuple] = (box, confidence, class_id)
-                
-        return list(filtered_detections.values())
-    
-    def extract_license_plate(self, image) -> str:
-        result = self.predict(image)
-        if not result:
-            raise ValueError("No ocr detections found")
-        print("OCR")
-        print(result.to_dict())
         
-        return  ''.join(map(lambda x: x['class_name'], result.to_dict()))
+        for detection  in detections:
+            box        = detection.box
+            box_tuple  = box.to_tuple()
+            confidence = detection.confidence
+            class_id   = detection.class_id
+            class_name = detection.class_name
+            
+            if box_tuple not in filtered_detections or filtered_detections[box_tuple][1] < confidence:
+                filtered_detections[box_tuple] = (box, confidence, class_id, class_name)
+                
+        return [
+            Detection(
+                class_id   = class_id,
+                class_name = class_name,
+                confidence = confidence,
+                box        = box
+                ) 
+            for box, confidence, class_id in filtered_detections.values()
+            ]
+    
+    def extract_license_plate(self, detections:  list[Detection]) -> str:
+        detections = self.filter_by_highest_confidence(detections)
+        if len(detections) == 0:
+            raise ValueError("No ocr detections found")
+        return ''.join(map(lambda x: x.class_name, detections))
