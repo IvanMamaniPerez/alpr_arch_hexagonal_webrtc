@@ -31,8 +31,6 @@ class LicensePlateOCR:
             detections = [(box, pred.boxes.conf[i].item(), int(pred.boxes.cls[i].item()))
                             for i, box in enumerate(pred.boxes.xyxy.tolist())]
             
-            print('Detections length:', len(detections))
-            
             detections.sort(key=lambda x: x[0][0])
             detections = self.filter_by_highest_confidence(detections)
             for box, confidence, class_id in detections:
@@ -41,9 +39,10 @@ class LicensePlateOCR:
                 print('Class Name into class:', class_name, 'Confidence:', confidence)
                 if confidence >= self.confidence:
                     results.append({
-                        'class_name': class_name,
+                        'class_id'        : class_id,
+                        'class_name'      : class_name,
                         'class_confidence': confidence,
-                        'box_coordinates': (x1, y1, x2, y2)
+                        'box_coordinates' : (x1, y1, x2, y2)
                     })
         return results
     
