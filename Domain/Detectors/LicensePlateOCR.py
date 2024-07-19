@@ -1,15 +1,18 @@
 from Domain.Detectors.Detector import Detector
 from Domain.Models.Detection import Detection
+from Domain.Models.ModelWrapper import ModelWrapper
 import numpy as np
 class LicensePlateOCR(Detector): 
     def __init__(
             self, 
-            model_path : str, 
-            confidence : float
+            model_path   : str,
+            confidence   : float,
+            model_wrapper: ModelWrapper
             ) -> None:
         super().__init__(
-            model_path = model_path, 
-            confidence = confidence
+            model_path    = model_path,
+            confidence    = confidence,
+            model_wrapper = model_wrapper
             )
 
     def filter_by_highest_confidence(self, detections : list[Detection]) -> list[Detection]:
@@ -31,7 +34,7 @@ class LicensePlateOCR(Detector):
                 class_name = class_name,
                 confidence = confidence,
                 box        = box
-                ) 
+                )
             for box, confidence, class_id in filtered_detections.values()
             ]
     

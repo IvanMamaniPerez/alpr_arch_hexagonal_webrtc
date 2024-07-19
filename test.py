@@ -1,7 +1,7 @@
 from Domain.Detectors.VehicleDetector import VehicleDetector 
 from Domain.Detectors.LicensePlateDetector import LicensePlateDetector 
 from Domain.Detectors.LicensePlateOCR import LicensePlateOCR 
-from infrastructure.Adapters.YOLODetectorAdapter import YOLODetectorAdapter as Detector
+from Infrastructure.Adapters.YOLODetectorAdapter import YOLODetectorAdapter as Detector
 import numpy as np
 import cv2
 import traceback
@@ -9,12 +9,39 @@ import datetime
 
 #Testing old code for OCR
 from src.Detector.LicensePlateOCR import LicensePlateOCR as LicensePlateOCROld
+from dotenv import load_dotenv
+import os
+from ultralytics import YOLO
+load_dotenv()
+# get implement for the model wrapper
+from Infrastructure.Implementations.ModelWrapperImplement import ModelWrapperImplement 
 
-vehicle_detector = VehicleDetector()
-license_plate_detector = LicensePlateDetector()
-license_plate_ocr = LicensePlateOCROld(
-    confidence=.4
+model_wrapper = ModelWrapperImplement()
+
+vehicle_detector = VehicleDetector(
+    model_path    = os.getenv("VEHICLE_MODEL_PATH", ''),
+    confidence    = float(os.getenv("VEHICLE_CONFIDENCE", .5)),
+    model_wrapper = model_wrapper
 )
+
+license_plate_detector = LicensePlateDetector(
+    model_path    = os.getenv("LICENSE_PLATE_MODEL_PATH", ''),
+    confidence    = float(os.getenv("LICENSE_PLATE_CONFIDENCE", .5)),
+    model_wrapper = model_wrapper
+)
+
+license_plate_ocr = LicensePlateOCR(
+    model_path    = os.getenv("OCR_MODEL_PATH", ''),
+    confidence    = float(os.getenv("OCR_CONFIDENCE", .4)),
+    model_wrapper = model_wrapper
+)
+
+
+
+
+# license_plate_ocr = LicensePlateOCROld(
+#     confidence=.4
+# )
 start = datetime.datetime.now()
 
 name_image = "auto_photo"
@@ -25,12 +52,10 @@ nparr = np.fromfile(path_image, np.uint8)
 img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
 print(start)
-
-# result = vehicle_detector.predict(img)
 try:
-
+    result = vehicle_detector.model.detect(img)
     img_cropped = Detector.crop_box_detected(result.box_coordinates, img)
-    img_license_plate = license_plate_detector.predict(img)
+    img_license_plate = license_plate_detector.model_wrapper.model.predict(img)
 
     print(img_license_plate.to_dict())
 

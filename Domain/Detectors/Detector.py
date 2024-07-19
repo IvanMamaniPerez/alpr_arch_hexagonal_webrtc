@@ -1,16 +1,22 @@
 from Domain.Models.Box import Box
 from Domain.Models.Detection import Detection
+from Domain.Models.ModelWrapper import ModelWrapper
 import numpy as np
 
-class Detector:
-    def __init__(self, model_path: str, confidence: float):
-        self.model_path : str   = model_path
-        self.confidence : float = confidence
-        self.detections : list[Detection]  = list()
-
+class Detector():
+    def __init__(self, model_path: str, confidence: float, model_wrapper: ModelWrapper):
+        self.model_path:str               = model_path
+        self.confidence:float             = confidence
+        self.detections : list[Detection] = list()
+        self.model: ModelWrapper  = model_wrapper.from_implementation(
+                                                model_path=model_path, 
+                                                confidence=confidence
+                                            )
+        
     def get_first_detection(self) -> Detection:
         if len(self.detections) == 0:
             raise ValueError("Empty detections list")
+        
         return self.detections[0]
 
     def clear_detections(self) -> None:
