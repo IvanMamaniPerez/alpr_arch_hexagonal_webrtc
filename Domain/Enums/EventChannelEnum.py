@@ -1,6 +1,6 @@
 from enum import Enum
 
-class EventTypeEnum(Enum):
-    DATACHANNEL = 'datachannel'
+class EventChannelEnum(Enum):
+    WEBRTC_DATACHANNEL = 'webrtc_datachannel'
     WEBHOOK     = 'webhook'
     QUEUE       = 'queue'
