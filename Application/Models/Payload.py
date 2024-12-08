@@ -1,6 +1,6 @@
 import numpy as np
-from abc import ABC, abstractmethod
-class Payload(ABC):
+
+class Payload:
     
     def __init__(self, uuid: str, reference_id:str, client_id:str, image: np.ndarray) -> None:
         self.uuid         : str        = uuid
@@ -15,13 +15,12 @@ class Payload(ABC):
             "client_id"    : self.client_id,
             "image"        : self.image.tolist()
         }
-        
-        
+
     @classmethod
     def from_dict(cls, payload_dict: dict) -> 'Payload':
         return cls(
-            payload_dict["uuid"],
-            payload_dict["reference_id"],
-            payload_dict["client_id"],
-            np.array(payload_dict["image"])
+            uuid         = payload_dict["uuid"],
+            reference_id = payload_dict["reference_id"],
+            client_id    = payload_dict["client_id"],
+            image        = np.array(payload_dict["image"])
         )

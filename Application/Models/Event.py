@@ -1,12 +1,12 @@
-from Domain.Enums.EventChannelEnum import EventChannelEnum
+from Application.Enums.EventChannelEnum import EventChannelEnum
 from datetime import datetime
-from Domain.Payloads.Payload import Payload
+from Application.Models.Payload import Payload
 class Event:
     def __init__(self, event_id: str, channel: EventChannelEnum, created_at: datetime, payload: Payload) -> None:
-        self.event_id   = event_id
-        self.channel    = channel
-        self.created_at = created_at
-        self.payload    = payload
+        self.event_id   : str              = event_id
+        self.channel    : EventChannelEnum = channel
+        self.created_at : datetime         = created_at
+        self.payload    : Payload          = payload
 
     @classmethod
     def from_dict(cls, data: dict) -> 'Event':

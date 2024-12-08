@@ -1,16 +1,18 @@
 from Application.Ports.DetectorPort import DetectorPort
 from Application.Ports.UseCasePort import UseCasePort
+from Application.Ports.PayloadManagerPort import PayloadPort
 from Domain.Detectors.VehicleDetector import VehicleDetector
 from Domain.Detectors.LicensePlateDetector import LicensePlateDetector
 from Application.Models.ResultUseCase import ResultUseCase
-from Domain.Payloads.Payload import Payload
+from Application.Models.Payload import Payload
 import cv2
 
-class DetectVehicleAndLicensePlateUseCase(UseCasePort):
+class DetectVehicleAndLicensePlateAndOCRUseCase(UseCasePort):
     def __init__(
             self, 
             vehicle_detector_port: DetectorPort, 
             license_plate_detector_port: DetectorPort, 
+            payload_port: PayloadPort,
             vehicle_detector: VehicleDetector,
             license_plate_detector: LicensePlateDetector
         ) -> None:
@@ -26,7 +28,6 @@ class DetectVehicleAndLicensePlateUseCase(UseCasePort):
         
         self.vehicle_detector_port.load_model(vehicle_detector)
         self.license_plate_detector_port.load_model(license_plate_detector)
-        
         
 
     def execute(self, payload: Payload) -> ResultUseCase:
@@ -48,7 +49,6 @@ class DetectVehicleAndLicensePlateUseCase(UseCasePort):
 
             cv2.imwrite('storage/cropped_ivan_stbks.png', img_cropped)
             """ For test """
-
 
             return ResultUseCase(
                 success = True,

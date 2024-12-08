@@ -4,7 +4,7 @@ from Domain.Detectors.LicensePlateDetector import LicensePlateDetector
 from Application.UseCases.DetectVehicleAndLicensePlateUseCase import DetectVehicleAndLicensePlateUseCase
 from Domain.Detectors.VehicleDetector import VehicleDetector
 from Domain.Detectors.Detector import Detector
-from Domain.Payloads.Payload import Payload
+from Application.Models.Payload import Payload
 import cv2
 import numpy as np
 from dotenv import load_dotenv

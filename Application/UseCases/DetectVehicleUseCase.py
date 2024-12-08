@@ -2,7 +2,7 @@ from Application.Ports.DetectorPort import DetectorPort
 from Application.Ports.UseCasePort import UseCasePort
 from Domain.Detectors.VehicleDetector import VehicleDetector
 from Application.Models.ResultUseCase import ResultUseCase
-from Domain.Payloads.Payload import Payload
+from Application.Models.Payload import Payload
 import numpy as np
 
 class DetectVehicleUseCase(UseCasePort):
